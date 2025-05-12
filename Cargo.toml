@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 image = "0.25.6"
+rustdct = "0.7.1"
+once_cell = "1.21.3"

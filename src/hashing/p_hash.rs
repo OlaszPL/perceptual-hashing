@@ -13,7 +13,7 @@ static DCT2_IMG: Lazy<Arc<dyn Dct2<f64>>> = Lazy::new(|| {
     planner.plan_dct2(IMG_SIZE as usize)
 });
 
-pub  fn p_hash(path: &Path) -> u64 {
+pub fn p_hash(path: &Path) -> u64 {
     let img: GrayImage = preprocess(path, IMG_SIZE, IMG_SIZE).unwrap();
     hash(&img)
 }

@@ -54,10 +54,10 @@ pub fn calculate_similarity(path: &Path, hashing_type: i8) -> HashMap<PathBuf, V
     let image_entries: Vec<(&PathBuf, &u64)> = hashes_map.iter().collect();
     let mut similarity_results: HashMap<PathBuf, Vec<(PathBuf, u32)>> = HashMap::new();
 
-    for (_, (path1, hash1)) in image_entries.iter().enumerate() {
+    for (path1, hash1) in image_entries.iter() {
         let mut distances = Vec::new();
-        for (_, (path2, hash2)) in image_entries.iter().enumerate() {
-            let distance = (**hash1^**hash2).count_ones();
+        for (path2, hash2) in image_entries.iter() {
+            let distance = (**hash1 ^ **hash2).count_ones();
             distances.push(((*path2).clone(), distance));
         }
         similarity_results.insert((*path1).clone(), distances);

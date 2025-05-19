@@ -1,3 +1,3 @@
-pub mod handler;
+pub mod handle;
 
-pub use crate::handler::handler::calculate_similarity;
+pub use crate::handler::handle::calculate_similarity;

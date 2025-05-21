@@ -12,39 +12,41 @@ enum Mode {
 }
 
 fn select_hashing_type() -> HashingType {
-    println!("1. pHash");
-    println!("2. dHash");
-    print!("Select hashing mode: ");
-    io::stdout().flush().unwrap();
+    loop {
+        println!("1. pHash");
+        println!("2. dHash");
+        print!("Select hashing mode: ");
+        io::stdout().flush().unwrap();
 
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
 
-    match input.trim() {
-        "1" => HashingType::PHash,
-        "2" => HashingType::DHash,
-        _ => {
-            println!("Invalid choice, defaulting to pHash.");
-            HashingType::PHash
+        match input.trim() {
+            "1" => return HashingType::PHash,
+            "2" => return HashingType::DHash,
+            _ => {
+                println!("Invalid choice, please try again.");
+            }
         }
     }
 }
 
 fn select_mode() -> Mode {
-    println!("1. Single");
-    println!("2. Multi");
-    print!("Select operation mode: ");
-    io::stdout().flush().unwrap();
+    loop {
+        println!("1. Single");
+        println!("2. Multi");
+        print!("Select operation mode: ");
+        io::stdout().flush().unwrap();
 
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
 
-    match input.trim() {
-        "1" => Mode::Single,
-        "2" => Mode::Multi,
-        _ => {
-            println!("Invalid choice, defaulting to Multi.");
-            Mode::Multi
+        match input.trim() {
+            "1" => return Mode::Single,
+            "2" => return Mode::Multi,
+            _ => {
+                println!("Invalid choice, please try again.");
+            }
         }
     }
 }

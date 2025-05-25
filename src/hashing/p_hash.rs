@@ -1,5 +1,5 @@
 use std::path::Path;
-use image::GrayImage;
+use image::{GrayImage, ImageError};
 use rustdct::{DctPlanner, Dct2};
 use std::sync::Arc;
 use once_cell::sync::Lazy;
@@ -13,9 +13,9 @@ static DCT2_IMG: Lazy<Arc<dyn Dct2<f64>>> = Lazy::new(|| {
     planner.plan_dct2(IMG_SIZE as usize)
 });
 
-pub fn p_hash(path: &Path) -> u64 {
-    let img: GrayImage = preprocess(path, IMG_SIZE, IMG_SIZE).unwrap();
-    hash(&img)
+pub fn p_hash(path: &Path) -> Result<u64, ImageError> {
+    let img: GrayImage = preprocess(path, IMG_SIZE, IMG_SIZE)?;
+    Ok(hash(&img))
 }
 
 fn hash(img: &GrayImage) -> u64 {

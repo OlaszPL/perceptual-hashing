@@ -1,144 +1,66 @@
-use std::io;
-use std::io::Write;
+use std::time::{Duration, Instant};
+use std::thread::sleep;
 use std::path::PathBuf;
 
-use crate::handler::handle::{select_file, select_folder, HashingType};
+use crate::handler::handle::HashingType;
 use crate::handler::similarity_analyzer::SimilarityAnalyzer;
+use crate::ui::UI;
+use color_eyre::{eyre::Ok, Result};
+use ratatui::{DefaultTerminal};
 
-#[derive(Debug, Copy, Clone)]
-enum Mode {
-    Single,
-    Multi
+const DURATION: Duration = Duration::from_millis(17);
+
+// logic and handling of the app
+
+pub enum CurrentScreen {
+    FolderChoose,
+    ChooseAnAlgorithm,
+    Calculating,
+    Main
 }
 
-fn select_hashing_type() -> HashingType {
-    loop {
-        println!("1. pHash");
-        println!("2. dHash");
-        print!("Select hashing mode: ");
-        io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-
-        match input.trim() {
-            "1" => return HashingType::PHash,
-            "2" => return HashingType::DHash,
-            _ => {
-                println!("Invalid choice, please try again.");
-            }
-        }
-    }
+pub struct App {
+    pub current_screen: CurrentScreen,
+    pub dir_path: Option<PathBuf>,
+    pub hashing_type: Option<HashingType>,
+    pub similarity_analyzer: Option<SimilarityAnalyzer>,
+    pub time_start: Option<Instant>,
+    pub time_elapsed: String,
+    pub items_list: Option<Vec<PathBuf>>,
+    pub exit: bool
 }
 
-fn select_mode() -> Mode {
-    loop {
-        println!("1. Single");
-        println!("2. Multi");
-        print!("Select operation mode: ");
-        io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-
-        match input.trim() {
-            "1" => return Mode::Single,
-            "2" => return Mode::Multi,
-            _ => {
-                println!("Invalid choice, please try again.");
-            }
+impl App {
+    pub fn new() -> Self {
+        App {
+            current_screen: CurrentScreen::FolderChoose,
+            dir_path: None,
+            hashing_type: None,
+            similarity_analyzer: None,
+            time_start: None,
+            time_elapsed: String::new(),
+            items_list: None,
+            exit: false
         }
     }
-}
 
-fn print_similarity_multi(analyzer: &SimilarityAnalyzer) {
-    println!("\n--- {} Similarity Results ---", analyzer.hash_type);
+    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> Result<()> {
+        let mut ui = UI::new()?;
 
-    let similarity_map = &analyzer.similarity_map;
-    if similarity_map.is_empty() {
-        println!(
-            "No similarities were found or calculated (e.g., not enough images or directory empty/invalid)."
-        );
-    } else {
-        for (img_path, similarities) in similarity_map {
-            let original_name = img_path
-                .file_name()
-                .map_or_else(|| "N/A".into(), |n| n.to_string_lossy());
+        while !self.exit {
+            let mut ui_result = Ok(());
+            // draw a frame composed by set_ui() function
+            terminal.draw(|f| {ui_result = ui.set_ui(f, self);})?;
+            ui_result?;
 
-            println!("Image: {}", original_name);
-            for (similar_img_path, distance) in similarities {
-                let similar_name = similar_img_path
-                    .file_name()
-                    .map_or_else(|| "N/A".into(), |n| n.to_string_lossy());
-                if original_name == similar_name {
-                    continue;
-                }
-                println!(
-                    "    -> Similar to: {:<30} (Distance: {})",
-                    similar_name,
-                    distance
-                );
-            }
-            println!();
+            sleep(DURATION); // to limit CPU usage
         }
+
+        Ok(())
     }
-}
 
-fn print_similarity_single(analyzer: &SimilarityAnalyzer, img_path: PathBuf) {
-    println!("\n--- {} Similarity Results (Single) ---", analyzer.hash_type);
-
-    let similarities = analyzer.get_one_file_similarity(&img_path);
-    let original_name = img_path
-        .file_name()
-        .map_or_else(|| "N/A".into(), |n| n.to_string_lossy());
-
-    println!("Image: {}", original_name);
-    if similarities.is_empty() {
-        println!("    No similar images found.");
-    } else {
-        for (similar_img_path, distance) in similarities {
-            let similar_name = similar_img_path
-                .file_name()
-                .map_or_else(|| "N/A".into(), |n| n.to_string_lossy());
-            if original_name == similar_name {
-                continue;
-            }
-            println!(
-                "    -> Similar to: {:<30} (Distance: {})",
-                similar_name,
-                distance
-            );
-        }
+    pub fn stop(&mut self) {
+        self.exit = true;
     }
-    println!();
-}
-
-
-pub fn run() {
-    let hashing_type : HashingType = select_hashing_type();
-    let dir_path = match select_folder() {
-        Some(path) => path,
-        None => {
-            println!("Folder selection was canceled. Exiting.");
-            return;
-        }
-    };
-    let sim_an : SimilarityAnalyzer = SimilarityAnalyzer::new(dir_path, hashing_type);
-    let mode : Mode = select_mode();
-
-    match mode {
-        Mode::Single =>
-            {
-            let file_path = match select_file() {
-                Some(path) => path,
-                None => {
-                    println!("File selection was canceled. Exiting.");
-                    return;
-                }
-            };
-            print_similarity_single(&sim_an, file_path);
-            },
-        Mode::Multi => 
-            print_similarity_multi(&sim_an),
-    }
+    
 }

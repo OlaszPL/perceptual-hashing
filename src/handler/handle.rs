@@ -1,13 +1,24 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use image::ImageError;
+
 use crate::hashing;
-use rfd::FileDialog;
 
 #[derive(Debug, Clone, Copy)]
 pub enum HashingType {
     DHash,
     PHash,
+}
+
+impl HashingType {
+    pub fn from_index(i: usize) -> Option<Self> {
+        match i {
+            0 => Some(Self::DHash),
+            1 => Some(Self::PHash),
+            _ => None
+        }
+    }
 }
 
 impl std::fmt::Display for HashingType {
@@ -19,41 +30,18 @@ impl std::fmt::Display for HashingType {
     }
 }
 
-pub fn select_folder() -> Option<PathBuf> {
-    FileDialog::new()
-        .set_title("Select a folder containing images")
-        .pick_folder()
-}
-
-pub fn select_file() -> Option<PathBuf> {
-    FileDialog::new()
-        .set_title("Select an image file")
-        .pick_file()
-}
-
-fn calculate_hashes(path: &Path, hashing_func: fn(path: &Path) -> u64) -> HashMap<PathBuf, u64> {
+fn calculate_hashes(path: &Path, hashing_func: fn(path: &Path) -> Result<u64, ImageError>) -> HashMap<PathBuf, u64> {
     let mut hashes = HashMap::new();
-    match fs::read_dir(path) {
-        Ok(paths) => {
-            for entry in paths {
-                match entry {
-                    Ok(dir_entry) => {
-                        let cur_path = dir_entry.path();
-                        if cur_path.is_file() {
-                            let cur_hash = hashing_func(&cur_path);
-                            hashes.insert(cur_path, cur_hash);
-                        }
-                    }
-                    Err(e) => {
-                        eprintln!("Error reading directory entry in {}: {}", path.display(), e);
+        if let Ok(paths) = fs::read_dir(path) {
+            for dir_entry in paths.flatten() {
+                let cur_path = dir_entry.path();
+                if cur_path.is_file() {
+                    if let Ok(cur_hash) = hashing_func(&cur_path) { // fault tolerance
+                        hashes.insert(cur_path, cur_hash);
                     }
                 }
             }
         }
-        Err(e) => {
-            eprintln!("Error reading directory {}: {}", path.display(), e);
-        }
-    }
     hashes
 }
 
@@ -64,11 +52,6 @@ pub fn calculate_similarity(path: &Path, hashing_type: HashingType) -> HashMap<P
     };
 
     if hashes_map.len() < 2 {
-        if hashes_map.is_empty() {
-            println!("No image hashes were calculated from the directory: {}", path.display());
-        } else {
-            println!("Only one image hash was calculated. Need at least two images to find similarities.");
-        }
         return HashMap::new();
     }
 

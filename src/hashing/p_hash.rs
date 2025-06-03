@@ -77,3 +77,68 @@ fn calculate_2d_dct(pixels: &[f64], size: usize) -> Vec<f64> {
 
     transposed
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::Path;
+    use image::io::Reader as ImageReader;
+    use crate::hashing::p_hash;
+    use img_hash::{HasherConfig, ImageHash};
+    use img_hash::image::{DynamicImage, GrayImage, GenericImageView, ImageError};
+
+
+    #[test]
+    fn compare_p_hashes_with_library() {
+        let test_images_dir = Path::new("test_images");
+    
+        let hasher = HasherConfig::new()
+            .hash_size(8, 8) // 8x8 = 64-bit jak u Ciebie
+            .preproc_dct()
+            .to_hasher();
+    
+        for entry in fs::read_dir(test_images_dir).expect("Could not read test_images directory") {
+            let entry = entry.expect("Could not read image entry");
+            let path = entry.path();
+    
+            if path.extension().map(|e| e.to_ascii_lowercase()) == Some("jpg".into())
+                || path.extension().map(|e| e.to_ascii_lowercase()) == Some("png".into())
+            {
+                println!("Testing image: {:?}", path);
+
+                let img_data = ImageReader::open(&path)
+                    .unwrap()
+                    .decode()
+                    .unwrap()
+                    .to_rgb8();
+                
+                let img = img_hash::image::DynamicImage::ImageRgb8(
+                    img_hash::image::ImageBuffer::from_raw(
+                        img_data.width(),
+                        img_data.height(),
+                        img_data.into_raw()
+                    ).unwrap()
+                );
+                
+                let lib_hash = hasher.hash_image(&img);
+
+
+                let my_hash = p_hash(&path).expect("p_hash failed");
+    
+                let lib_hash_u64 = {
+                    let bytes = lib_hash.as_bytes();
+                    assert_eq!(bytes.len(), 8, "Expected 64-bit hash");
+                    u64::from_be_bytes(bytes.try_into().unwrap())
+                };
+    
+                assert_eq!(
+                    my_hash, lib_hash_u64,
+                    "Hashes differ for image {:?}: my_hash={:016x}, lib_hash={:016x}",
+                    path.file_name().unwrap(),
+                    my_hash,
+                    lib_hash_u64
+                );
+            }
+        }
+    }
+}

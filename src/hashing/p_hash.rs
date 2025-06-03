@@ -77,3 +77,48 @@ fn calculate_2d_dct(pixels: &[f64], size: usize) -> Vec<f64> {
 
     transposed
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::Path;
+    use crate::hashing::p_hash;
+
+
+    #[test]
+    fn compare_p_hashes_with_library() {
+        let test_images_dir = Path::new("test_images");
+    
+        for entry in fs::read_dir(test_images_dir).expect("Could not read test_images directory") {
+            let entry = entry.expect("Could not read image entry");
+            let path = entry.path();
+    
+            if path.extension().map(|e| e.to_ascii_lowercase()) == Some("jpg".into())
+                || path.extension().map(|e| e.to_ascii_lowercase()) == Some("png".into())
+            {
+                println!("Testing image: {:?}", path);
+
+                let my_hash = p_hash(&path).expect("p_hash failed");
+
+                let file_name = path
+                    .file_name()
+                    .and_then(|os| os.to_str())
+                    .expect("Filename is not valid UTF-8");
+                let expected: u64 = match file_name {
+                    "test1.png" => 12663195060125985701,
+                    "test2.png" => 12658691477678476205,
+                    "test3.png" => 1651063045954352931,
+                    "test4.png" => 14395540918339539843,
+                    other => panic!("Nieoczekiwana nazwa pliku: {}", other),
+                };
+                assert_eq!(
+                    my_hash, expected,
+                    "Hashes differ for image {:?}: my_hash={:016x}, lib_hash={:016x}",
+                    path.file_name().unwrap(),
+                    my_hash,
+                    expected
+                );
+            }
+        }
+    }
+}

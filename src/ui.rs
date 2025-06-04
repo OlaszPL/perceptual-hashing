@@ -15,6 +15,8 @@ use crate::widgets::{algorithm_chooser::*,letters::*, list::draw_list};
 
 const POLL_DURATION: Duration = Duration::from_millis(50);
 
+pub enum ImageTarget {Mid, Right}
+
 pub struct UI {
     file_explorer: FileExplorer,
     pub selected_button: usize,
@@ -30,8 +32,6 @@ pub struct UI {
     pub image_right: Option<StatefulProtocol>,
     pub image_right_rx: Option<Receiver<StatefulProtocol>>
 }
-
-pub enum ImageTarget {Mid, Right}
 
 impl UI {
     pub fn new() -> Result<Self> {

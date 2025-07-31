@@ -19,8 +19,8 @@ pub fn p_hash(path: &Path) -> Result<u64, ImageError> {
 }
 
 fn hash(img: &GrayImage) -> u64 {
-    assert_eq!(img.width(), IMG_SIZE, "Image width must be {}", IMG_SIZE);
-    assert_eq!(img.height(), IMG_SIZE, "Image height must be {}", IMG_SIZE);
+    assert_eq!(img.width(), IMG_SIZE, "Image width must be {IMG_SIZE}");
+    assert_eq!(img.height(), IMG_SIZE, "Image height must be {IMG_SIZE}");
 
     let pixels_f64: Vec<f64> = img.pixels().map(|p| p[0] as f64).collect();
 
@@ -96,7 +96,7 @@ mod tests {
             if path.extension().map(|e| e.to_ascii_lowercase()) == Some("jpg".into())
                 || path.extension().map(|e| e.to_ascii_lowercase()) == Some("png".into())
             {
-                println!("Testing image: {:?}", path);
+                println!("Testing image: {path:?}");
 
                 let my_hash = p_hash(&path).expect("p_hash failed");
 
@@ -109,7 +109,7 @@ mod tests {
                     "test2.png" => 12658691477678476205,
                     "test3.png" => 1651063045954352931,
                     "test4.png" => 14395540918339539843,
-                    other => panic!("Nieoczekiwana nazwa pliku: {}", other),
+                    other => panic!("Unexpected file name: {other}"),
                 };
                 assert_eq!(
                     my_hash, expected,

@@ -12,8 +12,8 @@ pub fn d_hash(path: &Path) -> Result<u64, ImageError> {
 }
 
 fn hash(img: &GrayImage) -> u64 {
-    assert_eq!(img.height(), IMG_HEIGHT as u32, "Image height must be {}", IMG_HEIGHT);
-    assert_eq!(img.width(), IMG_WIDTH as u32, "Image width must be {}", IMG_WIDTH);
+    assert_eq!(img.height(), IMG_HEIGHT as u32, "Image height must be {IMG_HEIGHT}");
+    assert_eq!(img.width(), IMG_WIDTH as u32, "Image width must be {IMG_WIDTH}");
 
     // 1 means that left pixel is brighter than the right pixel, 0 otherwise
     // big-endian save
@@ -54,7 +54,7 @@ mod tests {
             if path.extension().map(|e| e.to_ascii_lowercase()) == Some("jpg".into())
                 || path.extension().map(|e| e.to_ascii_lowercase()) == Some("png".into())
             {
-                println!("Testing image: {:?}", path);
+                println!("Testing image: {path:?}");
 
                 let my_hash = d_hash(&path).expect("p_hash failed");
 
@@ -67,7 +67,7 @@ mod tests {
                     "test2.png" => 3400005699470571271,
                     "test3.png" => 12442841909063455382,
                     "test4.png" => 17435395539415830403,
-                    other => panic!("Nieoczekiwana nazwa pliku: {}", other),
+                    other => panic!("Unexpected file name: {other}"),
                 };
                 assert_eq!(
                     my_hash, expected,

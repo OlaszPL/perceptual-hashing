@@ -299,23 +299,27 @@ impl UI {
                         app.items_list = Some(items); // to keep consistent list in every iteration
 
                         // initalize structures for photo preview
-                        let picker = Picker::from_query_stdio()?;
-                        let image_source_mid = ImageReader::open(
-                            app.items_list.as_ref().unwrap().first().unwrap()
-                        )?.decode()?;
-                        self.image_mid = Some(picker.new_resize_protocol(image_source_mid));
-                        // and the next
-                        let image_source_right = ImageReader::open(
-                            &app.similarity_analyzer
-                                    .as_ref()
-                                    .unwrap()
-                                    .get_one_file_similarity(&app.items_list.as_ref().unwrap()[self.selected_button])
-                                    .iter()
-                                    .filter(|(path, _)| path != &app.items_list.as_ref().unwrap()[self.selected_button])
-                                    .collect::<Vec<_>>()
-                                    [self.selected_button_2].0 // read from the tuple
+                        // disabled on windows
+                        #[cfg(not(target_os = "windows"))]
+                        {
+                            let picker = Picker::from_query_stdio()?;
+                            let image_source_mid = ImageReader::open(
+                                app.items_list.as_ref().unwrap().first().unwrap()
                             )?.decode()?;
-                        self.image_right = Some(picker.new_resize_protocol(image_source_right));
+                            self.image_mid = Some(picker.new_resize_protocol(image_source_mid));
+                            // and the next
+                            let image_source_right = ImageReader::open(
+                                &app.similarity_analyzer
+                                        .as_ref()
+                                        .unwrap()
+                                        .get_one_file_similarity(&app.items_list.as_ref().unwrap()[self.selected_button])
+                                        .iter()
+                                        .filter(|(path, _)| path != &app.items_list.as_ref().unwrap()[self.selected_button])
+                                        .collect::<Vec<_>>()
+                                        [self.selected_button_2].0 // read from the tuple
+                                )?.decode()?;
+                            self.image_right = Some(picker.new_resize_protocol(image_source_right));
+                        }
 
                         app.current_screen = CurrentScreen::Main; // change screen
 
@@ -352,12 +356,16 @@ impl UI {
                                         self.selected_button = (self.selected_button + 1) % app.similarity_analyzer.as_ref().unwrap().similarity_map.len();
                                         self.selected_button_2 = 0;
                                         // set a new image
-                                        self.start_async_image_load(app.items_list.as_ref().unwrap()[self.selected_button].clone(), ImageTarget::Mid)?;
+                                        if self.image_mid.is_some() {
+                                            self.start_async_image_load(app.items_list.as_ref().unwrap()[self.selected_button].clone(), ImageTarget::Mid)?;
+                                        }
                                     }
                                     else {
                                         self.selected_button_2 = (self.selected_button_2 + 1) % self.files_num_column_1;
                                         // set a new image
-                                        self.load_second_img(app)?;
+                                        if self.image_mid.is_some() {
+                                            self.load_second_img(app)?;
+                                        }
                                     }
                                 },
                                 KeyCode::Char('k') | KeyCode::Up => {
@@ -366,12 +374,16 @@ impl UI {
                                         self.selected_button = (self.selected_button + max - 1) % max;
                                         self.selected_button_2 = 0;
                                         // set a new image
-                                        self.start_async_image_load(app.items_list.as_ref().unwrap()[self.selected_button].clone(), ImageTarget::Mid)?;
+                                        if self.image_mid.is_some() {
+                                            self.start_async_image_load(app.items_list.as_ref().unwrap()[self.selected_button].clone(), ImageTarget::Mid)?;
+                                        }
                                     }
                                     else {
                                         self.selected_button_2 = (self.selected_button_2 + self.files_num_column_1 - 1) % self.files_num_column_1;
                                         // set a new image
-                                        self.load_second_img(app)?;
+                                        if self.image_mid.is_some() {
+                                            self.load_second_img(app)?;
+                                        }
                                     }
                                 },
                                 KeyCode::Char('h') | KeyCode::Left => {

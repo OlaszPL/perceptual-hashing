@@ -935,6 +935,7 @@ dependencies = [
  "ratatui",
  "ratatui-explorer",
  "ratatui-image",
+ "rayon",
  "rustdct",
 ]
 

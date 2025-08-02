@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use image::ImageError;
+use rayon::prelude::*;
 
 use crate::hashing;
 
@@ -31,18 +32,24 @@ impl std::fmt::Display for HashingType {
 }
 
 fn calculate_hashes(path: &Path, hashing_func: fn(path: &Path) -> Result<u64, ImageError>) -> HashMap<PathBuf, u64> {
-    let mut hashes = HashMap::new();
-        if let Ok(paths) = fs::read_dir(path) {
-            for dir_entry in paths.flatten() {
-                let cur_path = dir_entry.path();
-                if cur_path.is_file() {
-                    if let Ok(cur_hash) = hashing_func(&cur_path) { // fault tolerance
-                        hashes.insert(cur_path, cur_hash);
-                    }
-                }
-            }
-        }
-    hashes
+    if let Ok(paths) = fs::read_dir(path) {
+        let file_paths: Vec<PathBuf> = paths
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| path.is_file())
+            .collect();
+
+        file_paths
+            .par_iter()
+            .filter_map(|cur_path| {
+                hashing_func(cur_path)
+                    .ok() // fault tolerance
+                    .map(|cur_hash| (cur_path.clone(), cur_hash))
+            })
+            .collect()
+    } else {
+        HashMap::new()
+    }
 }
 
 pub fn calculate_similarity(path: &Path, hashing_type: HashingType) -> HashMap<PathBuf, Vec<(PathBuf, u32)>> {
@@ -56,17 +63,17 @@ pub fn calculate_similarity(path: &Path, hashing_type: HashingType) -> HashMap<P
     }
 
     let image_entries: Vec<(&PathBuf, &u64)> = hashes_map.iter().collect();
-    let mut similarity_results: HashMap<PathBuf, Vec<(PathBuf, u32)>> = HashMap::new();
-
-    for (path1, hash1) in image_entries.iter() {
-        let mut distances = Vec::new();
-        for (path2, hash2) in image_entries.iter() {
-            let distance = (**hash1 ^ **hash2).count_ones();
-            distances.push(((*path2).clone(), distance));
-        }
-        distances.sort_by_key(|&(_, distance)| distance);
-        similarity_results.insert((*path1).clone(), distances);
-    }
-
-    similarity_results
+    
+    image_entries
+        .par_iter()
+        .map(|(path1, hash1)| {
+            let mut distances = Vec::new();
+            for (path2, hash2) in image_entries.iter() {
+                let distance = (**hash1 ^ **hash2).count_ones();
+                distances.push(((*path2).clone(), distance));
+            }
+            distances.sort_by_key(|&(_, distance)| distance);
+            ((*path1).clone(), distances)
+        })
+        .collect()
 }

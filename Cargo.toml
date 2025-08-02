@@ -14,6 +14,7 @@ color-eyre = "0.6.5"
 crossterm = "0.28.1"
 ratatui-explorer = "0.2.1"
 ratatui-image = "8.0.1"
+rayon = "1.10.0"
 
 [profile.dev.package."*"]
 opt-level = 3

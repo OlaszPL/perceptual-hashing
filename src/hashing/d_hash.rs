@@ -44,7 +44,7 @@ mod tests {
 
 
     #[test]
-    fn compare_p_hashes_with_library() {
+    fn compare_d_hashes_with_library() {
         let test_images_dir = Path::new("test_images");
 
         for entry in fs::read_dir(test_images_dir).expect("Could not read test_images directory") {

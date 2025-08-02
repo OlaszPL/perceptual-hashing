@@ -94,25 +94,29 @@ pub fn draw_list(frame: &mut Frame, app: &mut App, ui: &mut UI) {
         .split(chunks[2]);
 
     // Upper half: image in a frame
+    let image_block = Block::bordered()
+        .title(" Selected ")
+        .title(title2.right_aligned())
+        .border_set(border::THICK);
+    let image_area = image_block.inner(right_chunks[0]);
+    frame.render_widget(image_block, right_chunks[0]);
+
+    // show image if successfully loaded 
     if let Some(ref mut image_mid) = ui.image_mid {
-        let image_block = Block::bordered()
-            .title(" Selected ")
-            .title(title2.right_aligned())
-            .border_set(border::THICK);
-        let image_area = image_block.inner(right_chunks[0]);
-        frame.render_widget(image_block, right_chunks[0]);
         let image = StatefulImage::default();
         frame.render_stateful_widget(image, image_area, image_mid);
     }
 
     // lower half
+    let image_block = Block::bordered()
+        .title(" Similar ")
+        .title_bottom(instructions2.right_aligned())
+        .border_set(border::THICK);
+    let image_area = image_block.inner(right_chunks[1]);
+    frame.render_widget(image_block, right_chunks[1]);
+
+    // show image if successfully loaded 
     if let Some(ref mut image_right) = ui.image_right {
-        let image_block = Block::bordered()
-            .title(" Similar ")
-            .title_bottom(instructions2.right_aligned())
-            .border_set(border::THICK);
-        let image_area = image_block.inner(right_chunks[1]);
-        frame.render_widget(image_block, right_chunks[1]);
         let image = StatefulImage::default();
         frame.render_stateful_widget(image, image_area, image_right);
     }

@@ -101,12 +101,11 @@ impl UI {
             ImageTarget::Right => self.image_right_rx = Some(rx),
         }
         spawn(move || {
-            if let std::result::Result::Ok(image_reader) = ImageReader::open(&path) {
-                if let std::result::Result::Ok(image_source) = image_reader.decode() {
+            if let std::result::Result::Ok(image_reader) = ImageReader::open(&path)
+                && let std::result::Result::Ok(image_source) = image_reader.decode() {
                     let protocol = picker.new_resize_protocol(image_source);
                     tx.send(protocol).ok();
                 }
-            }
         });
         Ok(())
     }
@@ -258,17 +257,15 @@ impl UI {
                 // Frame render
                 f.render_widget(block, area);
 
-                if poll(POLL_DURATION)? {
-                    if let Event::Key(key) = read()? {
-                        if key.code == KeyCode::Char('q') {
+                if poll(POLL_DURATION)?
+                    && let Event::Key(key) = read()?
+                        && key.code == KeyCode::Char('q') {
                             app.stop();
                         }
-                    }
-                }
 
                 // check whether an analyzer is initializated
-                if let Some(rx) = &self.similarity_analyzer_rx {
-                    if let std::result::Result::Ok(analyzer) = rx.try_recv() {
+                if let Some(rx) = &self.similarity_analyzer_rx
+                    && let std::result::Result::Ok(analyzer) = rx.try_recv() {
                         app.time_elapsed = format!(" Time: {:.2}s ", app.time_start.unwrap().elapsed().as_secs_f32());
                         app.similarity_analyzer = Some(analyzer?);
 
@@ -299,56 +296,54 @@ impl UI {
                         app.items_list = Some(items); // to keep consistent list in every iteration
 
                         // initalize structures for photo preview
-                        // disabled on windows
+                        // disabled on windows, won't fail on other unsupported terminals
                         #[cfg(not(target_os = "windows"))]
                         {
-                            let picker = Picker::from_query_stdio()?;
-                            let image_source_mid = ImageReader::open(
-                                app.items_list.as_ref().unwrap().first().unwrap()
-                            )?.decode()?;
-                            self.image_mid = Some(picker.new_resize_protocol(image_source_mid));
-                            // and the next
-                            let image_source_right = ImageReader::open(
-                                &app.similarity_analyzer
-                                        .as_ref()
-                                        .unwrap()
-                                        .get_one_file_similarity(&app.items_list.as_ref().unwrap()[self.selected_button])
-                                        .iter()
-                                        .filter(|(path, _)| path != &app.items_list.as_ref().unwrap()[self.selected_button])
-                                        .collect::<Vec<_>>()
-                                        [self.selected_button_2].0 // read from the tuple
+                            if let std::result::Result::Ok(picker) = Picker::from_query_stdio() {
+                                let image_source_mid = ImageReader::open(
+                                    app.items_list.as_ref().unwrap().first().unwrap()
                                 )?.decode()?;
-                            self.image_right = Some(picker.new_resize_protocol(image_source_right));
+                                self.image_mid = Some(picker.new_resize_protocol(image_source_mid));
+                                // and the next
+                                let image_source_right = ImageReader::open(
+                                    &app.similarity_analyzer
+                                            .as_ref()
+                                            .unwrap()
+                                            .get_one_file_similarity(&app.items_list.as_ref().unwrap()[self.selected_button])
+                                            .iter()
+                                            .filter(|(path, _)| path != &app.items_list.as_ref().unwrap()[self.selected_button])
+                                            .collect::<Vec<_>>()
+                                            [self.selected_button_2].0 // read from the tuple
+                                    )?.decode()?;
+                                self.image_right = Some(picker.new_resize_protocol(image_source_right));
+                            }
                         }
 
                         app.current_screen = CurrentScreen::Main; // change screen
 
                         return Ok(())
                     }
-                }
             },
             
             CurrentScreen::Main => {
-                if let Some(rx) = &self.image_mid_rx {
-                    if let std::result::Result::Ok(protocol) = rx.try_recv() {
+                if let Some(rx) = &self.image_mid_rx
+                    && let std::result::Result::Ok(protocol) = rx.try_recv() {
                         self.image_mid = Some(protocol);
                         self.image_mid_rx = None;
                         // start loading second img corelated with the first
                         self.load_second_img(app)?;
                     }
-                }
-                if let Some(rx) = &self.image_right_rx {
-                    if let std::result::Result::Ok(protocol) = rx.try_recv() {
+                if let Some(rx) = &self.image_right_rx
+                    && let std::result::Result::Ok(protocol) = rx.try_recv() {
                         self.image_right = Some(protocol);
                         self.image_right_rx = None;
                     }
-                }
                 
                 draw_list(f, app, self);
 
-                if poll(POLL_DURATION)? {
-                    if let Event::Key(key) = read()? {
-                        if key.kind == KeyEventKind::Press {
+                if poll(POLL_DURATION)?
+                    && let Event::Key(key) = read()?
+                        && key.kind == KeyEventKind::Press {
                             match key.code {
                                 KeyCode::Char('q') => app.stop(),
                                 KeyCode::Char('j') | KeyCode::Down => {
@@ -411,8 +406,6 @@ impl UI {
                                 _ => {}
                             }
                         }
-                    }
-                }
             }
         }
 

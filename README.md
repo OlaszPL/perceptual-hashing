@@ -1,4 +1,4 @@
-# 🚀 Perceptual Hashing TUI
+# 🖼️ Perceptual Hashing TUI
 
 [![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
@@ -14,6 +14,8 @@ A terminal user interface (TUI) application for computing perceptual hashes of i
 
 - **Aleksander Jóźwik** - [https://github.com/OlaszPL](https://github.com/OlaszPL)
 - **Piotr Kacprzak** - [https://github.com/pkacprzak5](https://github.com/pkacprzak5)
+
+<img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/b18f8fc7-2cb3-4974-a3de-1c0ae8fe6506" />
 
 ## ✨ Features
 
@@ -34,6 +36,19 @@ The application provides an intuitive TUI interface with:
 1. **Built-in file explorer** - Navigate and select folders containing images
 2. **Algorithm selection** - Choose between dHash and pHash algorithms
 3. **Results browser** - View similar images with side-by-side preview of source and similar images
+
+## 🎬 Demo
+
+<div align="center">
+
+![Nagranieekranuz2025-10-0313-27-36-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/5dc6a231-ab4b-4f51-bcf9-e43d124b7175)
+
+
+*Complete workflow: folder selection → algorithm choice → processing → results exploration*
+
+</div>
+
+---
 
 ## 📋 Prerequisites
 
@@ -112,15 +127,21 @@ The TUI provides an intuitive workflow:
 - Press `c` to select a folder for processing
 - Press `q` to exit
 
+<img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/6ae29ef8-8067-46f4-bab6-b2a3f7e3d99e" />
+
 ### 2. **Algorithm Selection** 
 - Choose between **dHash** (red) and **pHash** (blue)
 - Use arrow keys or mouse to toggle selection
 - Press `Enter` to confirm
 
+<img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/2f3fdf36-05cc-4f94-8c87-200149d794a9" />
+
 ### 3. **Processing**
 - Real-time progress with "CALCULATING" indicator
 - Processing time displayed in the top-right corner
 - Multi-threaded computation for optimal performance
+
+<img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/339d5707-b26a-4405-8452-1b9b3383dfd1" />
 
 ### 4. **Results Exploration**
 - **Left Panel**: List of all processed images
@@ -128,17 +149,7 @@ The TUI provides an intuitive workflow:
 - **Right Panel**: Side-by-side preview of selected and similar images
 - Navigate with arrow keys, press `Esc` to go back
 
-## 🖼️ Screenshots
-
-The application features a beautiful TUI interface with:
-
-- **File Explorer**: Navigate through directories with an intuitive file browser
-- **Algorithm Selection**: Choose between dHash and pHash with a clean selection interface
-- **Progress Indicator**: Real-time processing status with timing information
-- **Results View**: Three-panel layout showing:
-  - File list (left panel)
-  - Similar images with distance scores (center panel) 
-  - Side-by-side image preview (right panel)
+<img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/b18f8fc7-2cb3-4974-a3de-1c0ae8fe6506" />
 
 ## 🧪 Testing
 
@@ -166,8 +177,6 @@ Tests cover:
 
 - **Language**: Rust 🦀 (memory-safe and blazing fast!)
 - **TUI Framework**: [Ratatui](https://github.com/ratatui-org/ratatui)
-- **Image Processing**: Multi-threaded perceptual hashing algorithms
-- **Concurrency**: Rust's built-in threading capabilities
 
 ## 📄 License
 

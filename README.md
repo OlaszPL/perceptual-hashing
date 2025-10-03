@@ -12,8 +12,8 @@ A terminal user interface (TUI) application for computing perceptual hashes of i
 
 **Project realized as a part of Rust Course at AGH University of Krakow by:**
 
-- **Aleksander Jóźwik** - [https://github.com/OlaszPL](https://github.com/OlaszPL)
-- **Piotr Kacprzak** - [https://github.com/pkacprzak5](https://github.com/pkacprzak5)
+- **Aleksander Jóźwik** - [[OlaszPL]](https://github.com/OlaszPL)
+- **Piotr Kacprzak** - [[pkacprzak5]](https://github.com/pkacprzak5)
 
 <img width="1594" height="1032" alt="image" src="https://github.com/user-attachments/assets/b18f8fc7-2cb3-4974-a3de-1c0ae8fe6506" />
 

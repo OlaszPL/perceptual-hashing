@@ -4,6 +4,8 @@
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/OlaszPL/perceptual-hashing?style=for-the-badge)](https://github.com/OlaszPL/perceptual-hashing/releases)
 
+[![Built With Ratatui](https://img.shields.io/badge/Built_With_Ratatui-000?logo=ratatui&logoColor=fff)](https://ratatui.rs/)
+
 > **Blazing fast** 🚀 and **memory-safe** perceptual hashing application built with Rust!
 
 A terminal user interface (TUI) application for computing perceptual hashes of images and finding similar images with convenient preview capabilities. Hash computation is performed using **multi-threading** for optimal performance.
